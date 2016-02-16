@@ -6,15 +6,18 @@
  */
 #include <iostream>
 #include <string>
+#include <vector>
+#include <set>
+#include "Ability.h"
 
 using namespace std;
 
 #ifndef CHARACTER_H_
 #define CHARACTER_H_
 
+
 class Character {
 public:
-	Character();
 	virtual ~Character();
 
 	Character(int,int,int,int,int,string);
@@ -25,8 +28,13 @@ public:
 	int getEnergy() const;
 	bool getIsDead() const;
 	void takeDamage(int);
-	string getAction();
 	string getName() const;
+	void loseEnergy(int);
+	void printAbilities();
+	Ability getAbilityFromName(string abilityName);
+	Ability getRandomAbility() const;
+	set<string> getAbilityNames();
+
 
 private:
 	int level;
@@ -36,7 +44,7 @@ private:
 	int energy;
 	bool isDead;
 	string name;
-	//Type Type;
+	vector<Ability> abilities;
 };
 
 #endif /* CHARACTER_H_ */
