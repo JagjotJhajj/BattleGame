@@ -18,18 +18,22 @@ class Character;
 class Ability {
 public:
 
+	enum Type {NORMAL, FIRE, WATER, GRASS, NUM_OF_TYPES};
+
+	Ability();
 	virtual ~Ability();
 
-	Ability(int cost, int power, string name);
+	Ability(int cost, int power, string name, int abilityType);
 
 
 
 	int getPower() const;
 
 	string getName() const;
+	int getType() const;
 
 	int getCost() const;
-	void doAbility(Character *user, Character *receiver);
+	void doAbility(Character *user, Character *receiver, double multiplier);
 
 	void setStatusChange(string stat, bool affectUser, int change, int multiplier);
 
@@ -43,6 +47,7 @@ private:
 	bool affectUser;
 	int change;
 	int multiplier;
+	int abilityType;
 };
 
 #endif /* ABILITY_H_ */

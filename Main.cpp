@@ -9,11 +9,11 @@
  *	Give the user ability to attack (x)
  *	Allow uppercase characters ( )
  *	Make the game winnable and loseable (x)
- *	Make battles more descriptive (example, use ability names) ( )
- *	Create different attack and character types (eg. fire, water, grass) ( )
+ *	Show ability costs ( )
+ *	Create different attack and character Type (eg. fire, water, grass) (x)
  *	Allow characters to "level up" ( )
  *	Create multiple abilities, including stat changers ( )
- *	Extend Character class into multiple different character types for enemies ( )
+ *	Extend Character class into multiple different character Type for enemies ( )
  *	Allow user to choose which type of enemy to face ( )
  *	Add a "help" command to give the user information ( )
  *
@@ -27,17 +27,32 @@
 using namespace std;
 
 #include "Character.h"
+#include "Ability.h"
+
+
+
 
 bool isValidAction(string action);
 void doUserAction(string action, Character *actionTaker, Character *receiver);
+void setUpTypeMatchups();
+enum Type {NORMAL, FIRE, WATER, GRASS, NUM_OF_TYPES};
+
+
+//An enum containing all the Type. The last element is the number of Type in the enum,
+//used for the type match-up array
+
+//The array of type matchups
+double typeMatchups[NUM_OF_TYPES][NUM_OF_TYPES];
+
 
 int main() {
 
+	setUpTypeMatchups();
 	//Create the character that the user uses
-	Character Protagonist(5, 10, 2, 100, 100, "Your character");
+	Character Protagonist(5, 10, 2, 1000, 100, "Your character", FIRE);
 
 	//Create an enemy character
-	Character Enemy(2, 3, 1, 20, 5, "McEvil");
+	Character Enemy(2, 3, 1, 500, 50000, "McEvil",WATER);
 
 	cout
 			<< "Welcome to the game! When using commands in the game, please\nuse lowercase only. Uppercase will be allowed in future versions (hopefully)\n";
@@ -61,7 +76,9 @@ int main() {
 		cout << "\n";
 
 		//Enemy's turn to take an action
-		Enemy.getRandomAbility().doAbility(&Enemy, &Protagonist);
+		Ability randomAbility = Enemy.getRandomAbility();
+		double multiplier = typeMatchups[randomAbility.getType()][Protagonist.getType()];
+		randomAbility.doAbility(&Enemy, &Protagonist, multiplier);
 		cout << "\n";
 	}
 
@@ -113,17 +130,25 @@ void doUserAction(string action, Character *actionTaker, Character *receiver) {
 	if (action == "attack") {
 
 		set<string> abilityNames = actionTaker->getAbilityNames();
-		string inputAbility;
+		string inputAbilityName;
 
 		do {
 			cout << "Choose an attack (current energy is "
 					<< actionTaker->getEnergy() << ")\n";
 			actionTaker->printAbilities();
-			cin >> inputAbility;
-		} while (abilityNames.find(inputAbility) == abilityNames.end());
+			cin >> inputAbilityName;
+		} while (abilityNames.find(inputAbilityName) == abilityNames.end());
 
-		actionTaker->getAbilityFromName(inputAbility).doAbility(actionTaker,
-				receiver);
+		Ability inputAbility = actionTaker->getAbilityFromName(inputAbilityName);
+
+		cout << actionTaker->getName() << " used " << inputAbilityName << "\n";
+
+		double multiplier = typeMatchups[inputAbility.getType()][receiver->getType()];
+
+
+		inputAbility.doAbility(actionTaker,receiver, multiplier);
+
+
 	} else if (action == "wait") {
 
 		//Make something that increases energy here
@@ -133,3 +158,37 @@ void doUserAction(string action, Character *actionTaker, Character *receiver) {
 
 }
 
+void setUpTypeMatchups(){
+
+	//First make each match-up a 1
+	for(int row = 0; row < NUM_OF_TYPES; row++){
+		for(int col = 0; col < NUM_OF_TYPES; col++){
+
+			typeMatchups[row][col] = 1.0;
+		}
+	}
+
+	//Normal is not weak or strong against any type
+
+	//Fire is strong against grass
+	typeMatchups[FIRE][GRASS] = 2.0;
+
+	//Fire is weak against water
+	typeMatchups[FIRE][WATER] = 0.5;
+
+	//Water is strong against fire
+	typeMatchups[WATER][FIRE] = 2.0;
+
+	//Water is weak against grass
+	typeMatchups[WATER][GRASS] = 0.5;
+
+	//Grass is strong against water
+	typeMatchups[GRASS][WATER] = 2.0;
+
+	//Grass is weak against fire
+	typeMatchups[GRASS][FIRE] = 0.5;
+
+
+
+
+}

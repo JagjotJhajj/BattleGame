@@ -8,7 +8,16 @@
 #include <stdlib.h>
 #include <time.h>
 
+enum Type {
+	NORMAL, FIRE, WATER, GRASS, NUM_OF_TYPES
+};
 
+/*
+ * Constructor
+ */
+Character::Character() {
+
+}
 
 /*
  * Destructor
@@ -20,74 +29,86 @@ Character::~Character() {
 /*
  * Constructor
  */
-Character::Character(int lvl, int atk, int def, int hp, int eng, string name){
+Character::Character(int level, int attack, int defense, int health, int energy,
+		string name, int characterType) {
 
-	level = lvl;
-	attack = atk;
-	defense = def;
-	health = hp;
-	energy = eng;
-	isDead = false;
+	this->level = level;
+	this->attack = attack;
+	this->defense = defense;
+	this->health = health;
+	this->energy = energy;
+	this->isDead = false;
 	this->name = name;
-	Ability Punch(0, 5, "punch");
+	Ability Punch(0, 5, "punch", NORMAL);
+	Ability Fireball(20, 15, "fireball", FIRE);
+	Ability Waterbomb(15, 10, "waterbomb", WATER);
+	Ability FlowerPower(50, 30, "flowerpower", GRASS);
+
 	abilities.push_back(Punch);
+	abilities.push_back(Fireball);
+	abilities.push_back(Waterbomb);
+	abilities.push_back(FlowerPower);
+
+	this->characterType = characterType;
 
 }
 /*
  * Multiple observer methods
  */
-int Character::getLevel() const{
+int Character::getLevel() const {
 	return level;
 }
 
-int Character::getAttack() const{
+int Character::getAttack() const {
 	return attack;
 }
 
-int Character::getDefense() const{
+int Character::getDefense() const {
 	return defense;
 }
 
-int Character::getHealth() const{
+int Character::getHealth() const {
 	return health;
 }
 
-int Character::getEnergy() const{
+int Character::getEnergy() const {
 	return energy;
 }
 
-bool Character::getIsDead() const{
+bool Character::getIsDead() const {
 	return isDead;
 }
 
-string Character::getName() const{
+string Character::getName() const {
 	return name;
+}
+
+int Character::getType() const {
+	return characterType;
 }
 
 /*
  * This function should be called when the character receives damage
  */
-void Character::takeDamage(int damage){
+void Character::takeDamage(int damage) {
 
-	if(health<=damage){
+	if (health <= damage) {
 		health = 0;
 		isDead = true;
-	}
-	else{
-		health -=damage;
+	} else {
+		health -= damage;
 	}
 }
-
 
 /*
  * This function should be called when the user loses energy. Does not allow energy
  * to become negative and instead makes the value 0 is loss>energy
  */
-void Character::loseEnergy(int loss){
+void Character::loseEnergy(int loss) {
 
 	energy -= loss;
-	if(energy<0){
-		energy=0;
+	if (energy < 0) {
+		energy = 0;
 	}
 }
 
@@ -95,9 +116,9 @@ void Character::loseEnergy(int loss){
  * Prints out the abilities of the character, one on each line, with a dash in front
  * of each ability
  */
-void Character::printAbilities(){
+void Character::printAbilities() {
 	vector<Ability>::iterator it;
-	for(it = abilities.begin(); it != abilities.end(); it++){
+	for (it = abilities.begin(); it != abilities.end(); it++) {
 		Ability a = *it;
 		cout << "-" << a.getName() << "\n";
 	}
@@ -106,10 +127,10 @@ void Character::printAbilities(){
 /*
  * Returns a set of the names of every ability this character has
  */
-set<string> Character::getAbilityNames(){
+set<string> Character::getAbilityNames() {
 	set<string> returnSet;
 	vector<Ability>::iterator it;
-	for(it = abilities.begin(); it != abilities.end(); it++){
+	for (it = abilities.begin(); it != abilities.end(); it++) {
 		Ability a = *it;
 		returnSet.insert(a.getName());
 	}
@@ -121,13 +142,13 @@ set<string> Character::getAbilityNames(){
  *
  * Precondition: the name given is an ability the character has
  */
-Ability Character::getAbilityFromName(string abilityName){
+Ability Character::getAbilityFromName(string abilityName) {
 
 	Ability a;
 	vector<Ability>::iterator it;
-	for(it = abilities.begin(); it != abilities.end(); it++){
+	for (it = abilities.begin(); it != abilities.end(); it++) {
 		a = *it;
-		if(a.getName() == abilityName){
+		if (a.getName() == abilityName) {
 			return a;
 		}
 	}
@@ -137,11 +158,10 @@ Ability Character::getAbilityFromName(string abilityName){
 /*
  * Returns a random ability that the character has
  */
-Ability Character::getRandomAbility() const{
+Ability Character::getRandomAbility() const {
 	srand(time(NULL));
 	int randomNum = rand() % abilities.size();
 
 	return abilities.at(randomNum);
 }
-
 

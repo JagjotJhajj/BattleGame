@@ -10,6 +10,7 @@
 #include <set>
 #include "Ability.h"
 
+
 using namespace std;
 
 #ifndef CHARACTER_H_
@@ -18,9 +19,12 @@ using namespace std;
 
 class Character {
 public:
+
+	Character();
+
 	virtual ~Character();
 
-	Character(int,int,int,int,int,string);
+	Character(int,int,int,int,int,string,int);
 	int getLevel() const;
 	int getAttack() const;
 	int getDefense() const;
@@ -34,6 +38,7 @@ public:
 	Ability getAbilityFromName(string abilityName);
 	Ability getRandomAbility() const;
 	set<string> getAbilityNames();
+	int getType() const;
 
 
 private:
@@ -45,6 +50,7 @@ private:
 	bool isDead;
 	string name;
 	vector<Ability> abilities;
+	int characterType;
 };
 
 #endif /* CHARACTER_H_ */
