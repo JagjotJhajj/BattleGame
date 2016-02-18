@@ -4,7 +4,6 @@
  *	and have fun doing so! It is a work in progress.
  *
  *	To do List:
- *	Allow uppercase characters
  *	Allow user to choose which enemy to face (eg. dragon or fish)
  *	Give user option to restart game after it ends
  *	Create stat changing abillities
@@ -31,9 +30,10 @@ using namespace std;
 #include "Protagonist.h"
 
 bool isValidAction(string action);
-void doUserCommand(string action, Character *actionTaker, Character *receiver);
+void doUserCommand(string action, Protagonist *actionTaker, Character *receiver);
 void setUpTypeMatchups();
 double getMultiplier(int attacker, int defender);
+
 
 //An enum containing all the Type. The last element is the number of Type in the enum,
 //used for the type match-up array
@@ -111,7 +111,7 @@ int main() {
 
 bool isValidAction(string action) {
 
-	if (action == "attack" || action == "wait") {
+	if (compareTwoStringsIgnoreCase(action,"attack") || compareTwoStringsIgnoreCase(action,"wait")) {
 		return true;
 	}
 
@@ -127,35 +127,18 @@ bool isValidAction(string action) {
  * 		  actionTaker, the Character doing the action
  * 		  receiver, the Character on the receiving end of the action
  */
-void doUserCommand(string action, Character *actionTaker, Character *receiver) {
+void doUserCommand(string action, Protagonist *user, Character *target) {
 
-	if (action == "attack") {
 
-		set<string> abilityNames = actionTaker->getAbilityNames();
-		string inputAbilityName;
+	if (compareTwoStringsIgnoreCase(action,"attack")) {
 
-		do {
-			cout << "Choose an attack (current energy is "
-					<< actionTaker->getEnergy() << ")\n";
-			actionTaker->printAbilities();
-			cin >> inputAbilityName;
-		} while (abilityNames.find(inputAbilityName) == abilityNames.end());
+		user->doAction(target);
 
-		Ability inputAbility = actionTaker->getAbilityFromName(
-				inputAbilityName);
-
-		cout << actionTaker->getName() << " used " << inputAbilityName << "\n";
-
-		double multiplier =
-				typeMatchups[inputAbility.getType()][receiver->getType()];
-
-		inputAbility.doAbility(actionTaker, receiver, multiplier);
-
-	} else if (action == "wait") {
+	} else if (compareTwoStringsIgnoreCase(action, "wait")) {
 
 		//Make something that increases energy here
 
-		cout << actionTaker->getName() << " just waited\n";
+		cout << user->getName() << " just waited\n";
 	}
 
 }
@@ -195,7 +178,57 @@ void setUpTypeMatchups() {
 
 }
 
+/*
+ * Get the multiplier bonus that the attacker typing has against the defender typing
+ */
 double getMultiplier(int attacker, int defender) {
 	return typeMatchups[attacker][defender];
 }
 
+/*
+ * Convert a string to lowercase
+ */
+string toLowerCase(string s){
+	string returnString;
+	for(unsigned int i =0; i<s.length(); i++){
+		if(s[i] >= 65 && s[i] <= 90){
+			returnString[i] -= ('A' - 'a');
+		}
+		else{
+			returnString[i] = s[i];
+		}
+	}
+	return returnString;
+
+}
+/*
+ * Compares two strings. Returns true if the strings are equal, ignoring case,
+ * and false otherwise
+ */
+bool compareTwoStringsIgnoreCase(string s1, string s2){
+
+	if(s1.length() != s2.length()){
+		return false;
+	}
+
+	//Convert both strings to lowercase
+	s1 = toLowerCase(s1);
+	s2 = toLowerCase(s2);
+
+	return s1 == s2;
+
+}
+
+/*
+ * Check if a string is in a set, ignoring case
+ */
+bool isStringInSetIgnoreCase(string word, set<string> wordSet){
+
+	set<string>::iterator it;
+	for(it = wordSet.begin(); it!= wordSet.end(); it++){
+		if(compareTwoStringsIgnoreCase(*it, word)){
+			return true;
+		}
+	}
+	return false;
+}

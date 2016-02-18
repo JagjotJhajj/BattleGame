@@ -78,7 +78,7 @@ void Ability::doAbility(Character *user, Character *receiver, double multiplier)
 	receiver->takeDamage(damage);
 
 
-	cout << receiver->getName() << " just took " << damage << " damage and has "
+	cout << receiver->getName() << " took " << damage << " damage and has "
 			<< receiver->getHealth() << " health left.\n";
 	}
 }

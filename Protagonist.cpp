@@ -52,7 +52,7 @@ void Protagonist::doAction(Character *target) {
 		cout << "Choose an attack (current energy is " << getEnergy() << ")\n";
 		printAbilities();
 		cin >> inputAbilityName;
-	} while (abilityNames.find(inputAbilityName) == abilityNames.end());
+	} while (!isStringInSetIgnoreCase(inputAbilityName, abilityNames));
 
 	Ability inputAbility = getAbilityFromName(inputAbilityName);
 

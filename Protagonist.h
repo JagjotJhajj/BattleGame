@@ -6,6 +6,7 @@
  */
 
 #include "Character.h"
+#include "Main.h"
 #ifndef PROTAGONIST_H_
 #define PROTAGONIST_H_
 

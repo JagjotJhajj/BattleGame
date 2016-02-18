@@ -138,7 +138,7 @@ Ability Character::getAbilityFromName(string abilityName) {
 	vector<Ability>::iterator it;
 	for (it = abilities.begin(); it != abilities.end(); it++) {
 		a = *it;
-		if (a.getName() == abilityName) {
+		if (compareTwoStringsIgnoreCase(a.getName(),abilityName)) {
 			return a;
 		}
 	}
