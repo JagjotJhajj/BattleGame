@@ -8,10 +8,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-enum Type {
-	NORMAL, FIRE, WATER, GRASS, NUM_OF_TYPES
-};
-
 /*
  * Constructor
  */
@@ -40,14 +36,8 @@ Character::Character(int level, int attack, int defense, int health, int energy,
 	this->isDead = false;
 	this->name = name;
 	Ability Punch(0, 5, "punch", NORMAL);
-	Ability Fireball(20, 15, "fireball", FIRE);
-	Ability Waterbomb(15, 10, "waterbomb", WATER);
-	Ability FlowerPower(50, 30, "flowerpower", GRASS);
 
 	abilities.push_back(Punch);
-	abilities.push_back(Fireball);
-	abilities.push_back(Waterbomb);
-	abilities.push_back(FlowerPower);
 
 	this->characterType = characterType;
 
@@ -120,7 +110,7 @@ void Character::printAbilities() {
 	vector<Ability>::iterator it;
 	for (it = abilities.begin(); it != abilities.end(); it++) {
 		Ability a = *it;
-		cout << "-" << a.getName() << "\n";
+		cout << "-" << a.getName() << " (cost: "<< a.getCost() << ")\n";
 	}
 }
 
@@ -165,3 +155,11 @@ Ability Character::getRandomAbility() const {
 	return abilities.at(randomNum);
 }
 
+void Character::doAction(Character *target) {
+	Ability randomAbility = getRandomAbility();
+	cout << getName() << " used " << randomAbility.getName() << "\n";
+	double multiplier = getMultiplier(randomAbility.getType(),target->getType());
+	randomAbility.doAbility(this, target, multiplier);
+	cout << "\n";
+
+}

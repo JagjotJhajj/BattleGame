@@ -9,6 +9,7 @@
 #include <vector>
 #include <set>
 #include "Ability.h"
+#include "Main.h"
 
 
 using namespace std;
@@ -17,14 +18,19 @@ using namespace std;
 #define CHARACTER_H_
 
 
+
 class Character {
 public:
 
+	enum Type {
+		NORMAL, FIRE, WATER, GRASS, NUM_OF_TYPES
+	};
 	Character();
 
 	virtual ~Character();
 
-	Character(int,int,int,int,int,string,int);
+	Character(int level, int attack, int defense, int health, int energy,
+			string name, int characterType);
 	int getLevel() const;
 	int getAttack() const;
 	int getDefense() const;
@@ -39,9 +45,9 @@ public:
 	Ability getRandomAbility() const;
 	set<string> getAbilityNames();
 	int getType() const;
+	void doAction(Character *target);
 
-
-private:
+protected:
 	int level;
 	int attack;
 	int defense;

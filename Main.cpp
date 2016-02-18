@@ -4,18 +4,16 @@
  *	and have fun doing so! It is a work in progress.
  *
  *	To do List:
- *	Make a Character class (x)
- *	Make an Ability class (x)
- *	Give the user ability to attack (x)
- *	Allow uppercase characters ( )
- *	Make the game winnable and loseable (x)
- *	Show ability costs ( )
- *	Create different attack and character Type (eg. fire, water, grass) (x)
- *	Allow characters to "level up" ( )
- *	Create multiple abilities, including stat changers ( )
- *	Extend Character class into multiple different character Type for enemies ( )
- *	Allow user to choose which type of enemy to face ( )
- *	Add a "help" command to give the user information ( )
+ *	Allow uppercase characters
+ *	Allow user to choose which enemy to face (eg. dragon or fish)
+ *	Give user option to restart game after it ends
+ *	Create stat changing abillities
+ *	Allow user to choose which type of enemy to face
+ *	Add a "help" command to give the user information
+ *	Make waiting increase energy
+ *	Make it so that enemies don't use abillities they don't have energy for (or make them never run out)
+ *	Make wait a command that is included in the abilities menu
+ *
  *
  */
 
@@ -28,37 +26,46 @@ using namespace std;
 
 #include "Character.h"
 #include "Ability.h"
-
-
-
+#include "Fish.h"
+#include "Dragon.h"
+#include "Protagonist.h"
 
 bool isValidAction(string action);
-void doUserAction(string action, Character *actionTaker, Character *receiver);
+void doUserCommand(string action, Character *actionTaker, Character *receiver);
 void setUpTypeMatchups();
-enum Type {NORMAL, FIRE, WATER, GRASS, NUM_OF_TYPES};
-
+double getMultiplier(int attacker, int defender);
 
 //An enum containing all the Type. The last element is the number of Type in the enum,
 //used for the type match-up array
 
-//The array of type matchups
-double typeMatchups[NUM_OF_TYPES][NUM_OF_TYPES];
+enum Type {
+	NORMAL, FIRE, WATER, GRASS, NUM_OF_TYPES
+};
 
+
+//The array of type matchups. The value in a cell (x,y) is the multiplier when type
+//x attacks type y. For example, fire deals double damage to grass but only half damage
+//to water, so typeMatchups[FIRE][GRASS] = 2.0 and typeMatchups[FIRE][WATER] = 0.5
+static double typeMatchups[NUM_OF_TYPES][NUM_OF_TYPES];
 
 int main() {
-
+	//Make sure the type matchups array is set up
 	setUpTypeMatchups();
+	cout << "Welcome to the game! When using commands in the game, please use lowercase only.\n";
+	cout << "Uppercase will be allowed in future versions (hopefully)\n";
+
 	//Create the character that the user uses
-	Character Protagonist(5, 10, 2, 1000, 100, "Your character", FIRE);
+	string userName;
+	cout << "What would you like to name your character?\n";
+	cin >> userName;
 
-	//Create an enemy character
-	Character Enemy(2, 3, 1, 500, 50000, "McEvil",WATER);
+	Protagonist User(userName);
 
-	cout
-			<< "Welcome to the game! When using commands in the game, please\nuse lowercase only. Uppercase will be allowed in future versions (hopefully)\n";
-
+	//Create an enemy character, for now it's a dragon
+	Dragon Enemy(20);
+	cout << "You face a mighty dragon!\n";
 	//Keep the game going until one character dies
-	while (!Protagonist.getIsDead() && !Enemy.getIsDead()) {
+	while (!User.getIsDead() && !Enemy.getIsDead()) {
 
 		string action;
 
@@ -69,30 +76,25 @@ int main() {
 			cin >> action;
 		} while (!isValidAction(action));
 
-		doUserAction(action, &Protagonist, &Enemy);
-		if (Protagonist.getIsDead() || Enemy.getIsDead()) {
+		doUserCommand(action, &User, &Enemy);
+		if (User.getIsDead() || Enemy.getIsDead()) {
 			break;
 		}
 		cout << "\n";
 
 		//Enemy's turn to take an action
-		Ability randomAbility = Enemy.getRandomAbility();
-		double multiplier = typeMatchups[randomAbility.getType()][Protagonist.getType()];
-		randomAbility.doAbility(&Enemy, &Protagonist, multiplier);
-		cout << "\n";
+		Enemy.doAction(&User);
 	}
 
 	//Check if the user has died (loss) or not (win)
 	//Note: in the case where both characters die (not possible currently),
 	//it will be a loss
-	if (Protagonist.getIsDead()) {
-		cout << Protagonist.getName() << " died! " << Protagonist.getName()
-				<< " lost!\n";
+	if (User.getIsDead()) {
+		cout << User.getName() << " died! " << User.getName() << " lost!\n";
 	}
 
 	else {
-		cout << Enemy.getName() << " died! " << Protagonist.getName()
-				<< " won!\n";
+		cout << Enemy.getName() << " died! " << User.getName() << " won!\n";
 
 	}
 
@@ -125,7 +127,7 @@ bool isValidAction(string action) {
  * 		  actionTaker, the Character doing the action
  * 		  receiver, the Character on the receiving end of the action
  */
-void doUserAction(string action, Character *actionTaker, Character *receiver) {
+void doUserCommand(string action, Character *actionTaker, Character *receiver) {
 
 	if (action == "attack") {
 
@@ -139,15 +141,15 @@ void doUserAction(string action, Character *actionTaker, Character *receiver) {
 			cin >> inputAbilityName;
 		} while (abilityNames.find(inputAbilityName) == abilityNames.end());
 
-		Ability inputAbility = actionTaker->getAbilityFromName(inputAbilityName);
+		Ability inputAbility = actionTaker->getAbilityFromName(
+				inputAbilityName);
 
 		cout << actionTaker->getName() << " used " << inputAbilityName << "\n";
 
-		double multiplier = typeMatchups[inputAbility.getType()][receiver->getType()];
+		double multiplier =
+				typeMatchups[inputAbility.getType()][receiver->getType()];
 
-
-		inputAbility.doAbility(actionTaker,receiver, multiplier);
-
+		inputAbility.doAbility(actionTaker, receiver, multiplier);
 
 	} else if (action == "wait") {
 
@@ -158,11 +160,11 @@ void doUserAction(string action, Character *actionTaker, Character *receiver) {
 
 }
 
-void setUpTypeMatchups(){
+void setUpTypeMatchups() {
 
 	//First make each match-up a 1
-	for(int row = 0; row < NUM_OF_TYPES; row++){
-		for(int col = 0; col < NUM_OF_TYPES; col++){
+	for (int row = 0; row < NUM_OF_TYPES; row++) {
+		for (int col = 0; col < NUM_OF_TYPES; col++) {
 
 			typeMatchups[row][col] = 1.0;
 		}
@@ -173,22 +175,27 @@ void setUpTypeMatchups(){
 	//Fire is strong against grass
 	typeMatchups[FIRE][GRASS] = 2.0;
 
-	//Fire is weak against water
+	//Fire is weak against water and fire
 	typeMatchups[FIRE][WATER] = 0.5;
+	typeMatchups[FIRE][FIRE] = 0.5;
 
 	//Water is strong against fire
 	typeMatchups[WATER][FIRE] = 2.0;
 
-	//Water is weak against grass
+	//Water is weak against grass and water
 	typeMatchups[WATER][GRASS] = 0.5;
+	typeMatchups[WATER][WATER] = 0.5;
 
 	//Grass is strong against water
 	typeMatchups[GRASS][WATER] = 2.0;
 
-	//Grass is weak against fire
+	//Grass is weak against fire and grass
 	typeMatchups[GRASS][FIRE] = 0.5;
-
-
-
+	typeMatchups[GRASS][GRASS] = 0.5;
 
 }
+
+double getMultiplier(int attacker, int defender) {
+	return typeMatchups[attacker][defender];
+}
+
