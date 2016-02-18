@@ -10,7 +10,7 @@
  *	Allow user to choose which type of enemy to face
  *	Add a "help" command to give the user information
  *	Make waiting increase energy
- *	Make it so that enemies don't use abillities they don't have energy for (or make them never run out)
+ *	Make it so that enemies don't use abilities they don't have energy for (or make them never run out)
  *	Make wait a command that is included in the abilities menu
  *
  *
@@ -51,8 +51,6 @@ static double typeMatchups[NUM_OF_TYPES][NUM_OF_TYPES];
 int main() {
 	//Make sure the type matchups array is set up
 	setUpTypeMatchups();
-	cout << "Welcome to the game! When using commands in the game, please use lowercase only.\n";
-	cout << "Uppercase will be allowed in future versions (hopefully)\n";
 
 	//Create the character that the user uses
 	string userName;
