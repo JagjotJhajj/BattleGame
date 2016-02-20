@@ -163,3 +163,12 @@ void Character::doAction(Character *target) {
 	cout << "\n";
 
 }
+
+void Character::rest(){
+	energy+=10;
+	//Overflow Check
+	if(energy<0){
+		energy=INT_MAX;
+	}
+	cout << getName() << " rested and gained 10 energy\n";
+}

@@ -1,17 +1,17 @@
 /**
  *	This is a text-only battle game loosely based off the battle system in Pokemon
  *	(one of my favorite games). It is a project I am using to help learn OOP in C++
- *	and have fun doing so! It is a work in progress.
+ *	and have fun doing so! I have now STOPPED DEVELOPMENT since reading break is almost
+ *	over and I need to spend the weekend doing schoolwork and Snowbots stuff.
  *
- *	To do List:
- *	Allow user to choose which enemy to face (eg. dragon or fish)
- *	Give user option to restart game after it ends
+ *
+ *	Wishlist (stuff I wish I could have added but ran out of time, might add them someday):
  *	Create stat changing abillities
- *	Allow user to choose which type of enemy to face
  *	Add a "help" command to give the user information
- *	Make waiting increase energy
- *	Make it so that enemies don't use abilities they don't have energy for (or make them never run out)
  *	Make wait a command that is included in the abilities menu
+ *	More enemy types
+ *	More abilities
+ *	Balance (make battles more competitive)
  *
  *
  */
@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include <set>
+#include <cstdlib>
 
 using namespace std;
 
@@ -30,10 +31,10 @@ using namespace std;
 #include "Protagonist.h"
 
 bool isValidAction(string action);
-void doUserCommand(string action, Protagonist *actionTaker, Character *receiver);
+void doUserCommand(string action, Protagonist *actionTaker,
+		Character *receiver);
 void setUpTypeMatchups();
 double getMultiplier(int attacker, int defender);
-
 
 //An enum containing all the Type. The last element is the number of Type in the enum,
 //used for the type match-up array
@@ -41,7 +42,6 @@ double getMultiplier(int attacker, int defender);
 enum Type {
 	NORMAL, FIRE, WATER, GRASS, NUM_OF_TYPES
 };
-
 
 //The array of type matchups. The value in a cell (x,y) is the multiplier when type
 //x attacks type y. For example, fire deals double damage to grass but only half damage
@@ -52,50 +52,76 @@ int main() {
 	//Make sure the type matchups array is set up
 	setUpTypeMatchups();
 
-	//Create the character that the user uses
-	string userName;
-	cout << "What would you like to name your character?\n";
-	cin >> userName;
+	bool newGame = true;
+	while (newGame) {
+		//Create the character that the user uses
+		string userName;
+		cout << "What would you like to name your character?\n";
+		cin >> userName;
 
-	Protagonist User(userName);
-
-	//Create an enemy character, for now it's a dragon
-	Dragon Enemy(20);
-	cout << "You face a mighty dragon!\n";
-	//Keep the game going until one character dies
-	while (!User.getIsDead() && !Enemy.getIsDead()) {
-
-		string action;
-
-		//First, the user takes an action
+		Protagonist User(userName);
+		string enemyInput;
+		Character Enemy;
 		do {
-			cout << "Please choose to attack or wait\n";
+			cout << "Choose your enemy:\n-Fish\n-Dragon\n";
+			cin >> enemyInput;
+		} while (!compareTwoStringsIgnoreCase(enemyInput, "fish")
+				&& !compareTwoStringsIgnoreCase(enemyInput, "dragon"));
 
-			cin >> action;
-		} while (!isValidAction(action));
-
-		doUserCommand(action, &User, &Enemy);
-		if (User.getIsDead() || Enemy.getIsDead()) {
-			break;
+		if (compareTwoStringsIgnoreCase(enemyInput, "fish")) {
+			Enemy = Fish(10);
+			cout << "You face a fish!\n";
+		} else {
+			Enemy = Dragon(20);
+			cout << "You face a mighty dragon!\n";
 		}
-		cout << "\n";
 
-		//Enemy's turn to take an action
-		Enemy.doAction(&User);
+		//Keep the game going until one character dies
+		while (!User.getIsDead() && !Enemy.getIsDead()) {
+
+			string action;
+
+			//First, the user takes an action
+			do {
+				cout << "Please choose to attack or wait\n";
+
+				cin >> action;
+			} while (!isValidAction(action));
+
+			doUserCommand(action, &User, &Enemy);
+			if (User.getIsDead() || Enemy.getIsDead()) {
+				break;
+			}
+			cout << "\n";
+
+			//Enemy's turn to take an action
+			Enemy.doAction(&User);
+		}
+
+		//Check if the user has died (loss) or not (win)
+		//Note: in the case where both characters die (not possible currently),
+		//it will be a loss
+		if (User.getIsDead()) {
+			cout << User.getName() << " died! " << User.getName() << " lost!\n";
+		}
+
+		else {
+			cout << Enemy.getName() << " died! " << User.getName() << " won!\n";
+
+		}
+		string inputGameStatus;
+
+		do {
+			cout << "Play again? (y or n)\n";
+
+			cin >> inputGameStatus;
+
+		} while (!compareTwoStringsIgnoreCase(inputGameStatus,"y") && !compareTwoStringsIgnoreCase(inputGameStatus,"n"));
+
+		if (compareTwoStringsIgnoreCase(inputGameStatus,"n")) {
+			newGame = false;
+		}
 	}
-
-	//Check if the user has died (loss) or not (win)
-	//Note: in the case where both characters die (not possible currently),
-	//it will be a loss
-	if (User.getIsDead()) {
-		cout << User.getName() << " died! " << User.getName() << " lost!\n";
-	}
-
-	else {
-		cout << Enemy.getName() << " died! " << User.getName() << " won!\n";
-
-	}
-
 	return 0;
 }
 
@@ -109,7 +135,8 @@ int main() {
 
 bool isValidAction(string action) {
 
-	if (compareTwoStringsIgnoreCase(action,"attack") || compareTwoStringsIgnoreCase(action,"wait")) {
+	if (compareTwoStringsIgnoreCase(action, "attack")
+			|| compareTwoStringsIgnoreCase(action, "wait")) {
 		return true;
 	}
 
@@ -127,16 +154,13 @@ bool isValidAction(string action) {
  */
 void doUserCommand(string action, Protagonist *user, Character *target) {
 
-
-	if (compareTwoStringsIgnoreCase(action,"attack")) {
+	if (compareTwoStringsIgnoreCase(action, "attack")) {
 
 		user->doAction(target);
 
 	} else if (compareTwoStringsIgnoreCase(action, "wait")) {
 
-		//Make something that increases energy here
-
-		cout << user->getName() << " just waited\n";
+		user->rest();
 	}
 
 }
@@ -184,35 +208,26 @@ double getMultiplier(int attacker, int defender) {
 }
 
 /*
- * Convert a string to lowercase
- */
-string toLowerCase(string s){
-	string returnString;
-	for(unsigned int i =0; i<s.length(); i++){
-		if(s[i] >= 65 && s[i] <= 90){
-			returnString[i] -= ('A' - 'a');
-		}
-		else{
-			returnString[i] = s[i];
-		}
-	}
-	return returnString;
-
-}
-/*
  * Compares two strings. Returns true if the strings are equal, ignoring case,
  * and false otherwise
  */
-bool compareTwoStringsIgnoreCase(string s1, string s2){
+bool compareTwoStringsIgnoreCase(string s1, string s2) {
 
-	if(s1.length() != s2.length()){
+	if (s1.length() != s2.length()) {
 		return false;
 	}
 
 	//Convert both strings to lowercase
-	s1 = toLowerCase(s1);
-	s2 = toLowerCase(s2);
-
+	for (unsigned int i = 0; i < s1.length(); i++) {
+		if (s1[i] >= 65 && s1[i] <= 90) {
+			s1[i] -= ('A' - 'a');
+		}
+	}
+	for (unsigned int i = 0; i < s2.length(); i++) {
+		if (s2[i] >= 65 && s2[i] <= 90) {
+			s2[i] -= ('A' - 'a');
+		}
+	}
 	return s1 == s2;
 
 }
@@ -220,11 +235,11 @@ bool compareTwoStringsIgnoreCase(string s1, string s2){
 /*
  * Check if a string is in a set, ignoring case
  */
-bool isStringInSetIgnoreCase(string word, set<string> wordSet){
+bool isStringInSetIgnoreCase(string word, set<string> wordSet) {
 
 	set<string>::iterator it;
-	for(it = wordSet.begin(); it!= wordSet.end(); it++){
-		if(compareTwoStringsIgnoreCase(*it, word)){
+	for (it = wordSet.begin(); it != wordSet.end(); it++) {
+		if (compareTwoStringsIgnoreCase(*it, word)) {
 			return true;
 		}
 	}

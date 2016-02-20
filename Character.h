@@ -10,6 +10,8 @@
 #include <set>
 #include "Ability.h"
 #include "Main.h"
+#include <climits>
+
 
 
 using namespace std;
@@ -46,6 +48,7 @@ public:
 	set<string> getAbilityNames();
 	int getType() const;
 	void doAction(Character *target);
+	void rest();
 
 protected:
 	int level;

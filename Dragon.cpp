@@ -20,7 +20,7 @@ Dragon::Dragon(int level){
 	this->attack = level * 3;
 	this->defense = level;
 	this->health = level * 10;
-	this->energy = 10000;
+	this->energy = INT_MAX;
 	this->isDead = false;
 	this->name = "Dragon";
 	this->characterType = FIRE;

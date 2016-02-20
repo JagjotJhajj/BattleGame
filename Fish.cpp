@@ -2,14 +2,11 @@
  * A fish is a type of enemy character
  */
 #include "Fish.h"
-
 Fish::Fish() {
-	// TODO Auto-generated constructor stub
 
 }
 
 Fish::~Fish() {
-	// TODO Auto-generated destructor stub
 }
 
 Fish::Fish(int level){
@@ -18,7 +15,7 @@ Fish::Fish(int level){
 	attack = (level/2) + 3;
 	defense = (level/3) + 1;
 	health = level * 4;
-	energy = 10000;
+	energy = INT_MAX;
 	isDead = false;
 	name = "Fish";
 	characterType = WATER;

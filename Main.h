@@ -14,7 +14,5 @@
 double getMultiplier(int attacker, int defender);
 bool compareTwoStringsIgnoreCase(string s1, string s2);
 bool isStringInSetIgnoreCase(string word, set<string> wordSet);
-string toLowerCase(string s);
-
 
 #endif /* MAIN_H_ */
